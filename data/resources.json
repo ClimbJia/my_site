@@ -1,0 +1,40 @@
+{
+  "cache_ver": "20260219_01",
+  "title": "资料下载",
+  "subtitle": "请选择需要下载的宣传资料与详细参数",
+  "products": [
+    {
+      "sid": 1,
+      "product": "漂流柜",
+      "brochures": [
+        { "id": "b_liuliu_guide_pdf", "name": "漂流柜产品手册", "file": "/static/files/piaoliu-guide.pdf", "type": "PDF" },
+        { "id": "b_liuliu_intro_pdf", "name": "漂流柜介绍页", "file": "/static/files/piaoliu-intro.pdf", "type": "PDF" }
+      ],
+      "specs": [
+        { "id": "s_liuliu_specs_docx", "name": "漂流柜技术参数", "file": "/static/files/piaoliu-specs.docx", "type": "docx" }
+      ]
+    },
+    {
+      "sid": 2,
+      "product": "自助借阅",
+      "brochures": [
+        { "id": "b_kiosk_guide_pdf", "name": "自助借阅产品手册", "file": "/static/files/dcpm.pdf", "type": "PDF" },
+        { "id": "b_kiosk_plan_docx", "name": "自助借阅方案说明", "file": "/static/files/dcpm.pdf", "type": "WORD" }
+      ],
+      "specs": [
+        { "id": "s_kiosk_specs_pdf", "name": "自助借阅技术参数", "file": "/static/files/dcpm.pdf", "type": "PDF" }
+      ]
+    },
+    {
+      "sid": 3,
+      "product": "电子绘本",
+      "brochures": [
+        { "id": "b_epic_intro_pdf", "name": "电子绘本产品介绍", "file": "/static/files/dcpm.pdf", "type": "PDF" },
+        { "id": "b_epic_usage_pdf", "name": "电子绘本使用说明", "file": "/static/files/dcpm.pdf", "type": "PDF" }
+      ],
+      "specs": [
+        { "id": "s_epic_specs_pdf", "name": "电子绘本参数说明", "file": "/static/files/dcpm.pdf", "type": "PDF" }
+      ]
+    }
+  ]
+}

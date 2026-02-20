@@ -1,0 +1,10 @@
+{
+    "cache_ver": "20260216_01",
+    "title": "解决方案",
+    "subtitle": "针对不同角色的专业化解决方案",
+    "items": [
+      {"id":"s1","title":"园长","desc":"打造园所阅读体系，提升品牌影响力","poster":"/static/posters/p1.jpg"},
+      {"id":"s2","title":"教研员","desc":"形成可复制机制，助力高质量建设","poster":"/static/posters/p2.jpg"},
+      {"id":"s3","title":"代理商","desc":"标准化产品交付，拓展区域市场","poster":"/static/posters/p3.jpg"}
+    ]
+  }

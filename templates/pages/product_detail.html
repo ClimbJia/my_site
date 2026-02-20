@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}{{ product.title }} - 小书仔{% endblock %}
+
+{% block content %}
+<section class="page-hero">
+    <div class="container">
+        <h1 class="page-title">{{ product.title }}</h1>
+        <p class="page-subtitle">{{ product.desc }}</p>
+    </div>
+</section>
+
+<section class="section product-detail-section">
+    <div class="container">
+        {% if product.poster_url %}
+        <div class="product-detail-cover" style="background-image:url('{{ product.poster_url }}');background-size:cover;background-position:center;aspect-ratio:16/10;border-radius:12px;"></div>
+        {% endif %}
+
+        {% if product.tagline %}
+        <p class="product-tagline">{{ product.tagline }}</p>
+        {% endif %}
+
+        {% if product.highlights %}
+        <h3 class="product-section-title">产品亮点</h3>
+        <ul class="product-highlights">
+            {% for h in product.highlights %}
+            <li>{{ h }}</li>
+            {% endfor %}
+        </ul>
+        {% endif %}
+
+        {% if product.features %}
+        <h3 class="product-section-title">产品特性</h3>
+        <ul class="product-features-list">
+            {% for f in product.features %}
+            <li>{{ f }}</li>
+            {% endfor %}
+        </ul>
+        {% endif %}
+
+        <div class="product-cta">
+            <a href="{% if product.cta %}{{ product.cta.href }}{% else %}{{ site.cta.href }}{% endif %}" class="btn btn-primary">{% if product.cta %}{{ product.cta.label }}{% else %}{{ site.cta.label }}{% endif %}</a>
+        </div>
+    </div>
+</section>
+{% endblock %}

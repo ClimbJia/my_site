@@ -1,0 +1,32 @@
+{
+  "cache_ver": "20260216_01",
+  "sections": {
+    "products": {
+      "title": "产品矩阵",
+      "items": [
+        {"title": "漂流柜", "desc": "图书漂流智能管理，轻松流转", "poster": "posters/p1.jpg", "href": "#"},
+        {"title": "自助借阅", "desc": "一站式自助借还，高效便捷", "poster": "posters/p2.jpg", "href": "#"},
+        {"title": "电子绘本立式阅读机", "desc": "碎片化故事阅读", "poster": "posters/p3.jpg", "href": "#"},
+        {"title": "电子绘本（班级端）", "desc": "教室大屏互动阅读", "poster": "posters/p4.jpg", "href": "#"},
+        {"title": "平板阅读机", "desc": "多场景阅读终端", "poster": "posters/p5.jpg", "href": "#"},
+        {"title": "迷你朗读亭", "desc": "沉浸式朗读体验", "poster": "posters/p6.jpg", "href": "#"}
+      ]
+    },
+    "solutions": {
+      "title": "解决方案",
+      "items": [
+        {"title": "园长", "desc": "打造园所阅读特色，提升品牌影响力", "poster": "posters/s1.jpg", "href": "#"},
+        {"title": "教研员", "desc": "丰富教学资源，助力课程建设", "poster": "posters/s2.jpg", "href": "#"},
+        {"title": "代理商", "desc": "优质产品+完善服务，拓展区域市场", "poster": "posters/s3.jpg", "href": "#"}
+      ]
+    },
+    "cases": {
+      "title": "案例",
+      "items": [
+        {"title": "案例一", "desc": "占位文案", "poster": "posters/c1.jpg", "href": "#"},
+        {"title": "案例二", "desc": "占位文案", "poster": "posters/c2.jpg", "href": "#"},
+        {"title": "案例三", "desc": "占位文案", "poster": "posters/c3.jpg", "href": "#"}
+      ]
+    }
+  }
+}

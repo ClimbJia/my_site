@@ -1,0 +1,212 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}首页 - 小书仔{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css">
+{% endblock %}
+
+{% block content %}
+<section class="hero">
+    <div class="hero-inner">
+        <div class="hero-content">
+            <h1 class="hero-title">智慧阅读，赋能教育</h1>
+            <p class="hero-subtitle">专业儿童阅读解决方案，助力园所打造高品质阅读环境，培养终身阅读习惯。</p>
+            <div class="hero-buttons">
+                <a href="{% url 'contact' %}#demo" class="btn btn-primary">预约演示</a>
+                <a href="{% url 'contact' %}#plan" class="btn btn-secondary">索取方案</a>
+            </div>
+        </div>
+        <div class="hero-media">
+            <div id="demoSwiper" class="hero-video-swiper swiper">
+                <div class="swiper-wrapper">
+                    {% for v in hero_videos %}
+                    <div class="swiper-slide">
+                        <div class="slide-video-wrap">
+                            <video class="slide-video" playsinline webkit-playsinline preload="metadata" poster="{% static v.poster %}?v={{ CACHE_VER }}">
+                                <source src="{% static v.src %}?v={{ CACHE_VER }}" type="video/mp4">
+                            </video>
+                            <button type="button" class="video-play-overlay" aria-label="播放">
+                                <svg viewBox="0 0 24 24" width="48" height="48" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+                            </button>
+                            <div class="video-play-error" role="alert">无法播放：请检查视频编码(H.264/AAC)或浏览器自动播放限制</div>
+                        </div>
+                        <div class="slide-caption">
+                            <div class="slide-title">{{ v.title }}</div>
+                            <div class="slide-desc">{{ v.desc }}</div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                <div class="swiper-pagination hero-video-pagination"></div>
+                <div class="swiper-button-prev hero-video-prev"></div>
+                <div class="swiper-button-next hero-video-next"></div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="section section-products">
+    <div class="container">
+        <h2 class="section-title">{{ HOME_CFG.sections.products.title }}</h2>
+        <div class="product-grid">
+            {% for item in HOME_CFG.sections.products.items %}
+            <a href="/products/{{ forloop.counter }}/" class="card product-card">
+                <div class="card-placeholder" style="background-image:url('{% static item.poster %}?v={{ HOME_CFG.cache_ver }}');background-size:cover;background-position:center;"></div>
+                <h3 class="card-title">{{ item.title }}</h3>
+                <p class="card-desc">{{ item.desc }}</p>
+            </a>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+
+<section class="section section-solutions">
+    <div class="container">
+        <h2 class="section-title">{{ HOME_CFG.sections.solutions.title }}</h2>
+        <div class="solutions-grid">
+            {% for item in HOME_CFG.sections.solutions.items %}
+            <a href="{{ item.href|default:'#' }}" class="card solution-card" style="text-decoration:none;color:inherit;display:block;">
+                <div class="card-placeholder" style="background-image:url('{% static item.poster %}?v={{ HOME_CFG.cache_ver }}');background-size:cover;background-position:center;"></div>
+                <h3 class="card-title">{{ item.title }}</h3>
+                <p class="card-desc">{{ item.desc }}</p>
+            </a>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+
+<section class="section section-cases">
+    <div class="container">
+        <h2 class="section-title">{{ HOME_CFG.sections.cases.title }}</h2>
+        <div class="cases-grid">
+            {% for item in HOME_CFG.sections.cases.items %}
+            <a href="/cases/c{{ forloop.counter }}/" class="card case-card">
+                <div class="card-placeholder" style="background-image:url('{% static item.poster %}?v={{ HOME_CFG.cache_ver }}');background-size:cover;background-position:center;"></div>
+                <h3 class="card-title">{{ item.title }}</h3>
+                <p class="card-desc">{{ item.desc }}</p>
+            </a>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+
+<section class="section section-contact">
+    <div class="container">
+        <h2 class="section-title">联系我们</h2>
+        <div class="contact-inner">
+            <div class="contact-phone">
+                <p class="contact-label">咨询热线</p>
+                <p class="contact-value">400-960-7985</p>
+            </div>
+            <div class="contact-qr">
+                <div class="qr-placeholder">
+                    <img src="{% static 'images/wechat-qr.jpg' %}" alt="扫码咨询" style="width:100%;height:100%;object-fit:contain;">
+                </div>
+                <p class="qr-label">扫码咨询</p>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+    var heroMedia = document.querySelector('.hero-media');
+    var swiperEl = document.querySelector("#demoSwiper");
+    if (!swiperEl || !heroMedia) {
+        console.error("Hero video container not found");
+        return;
+    }
+
+    function getActiveSlide() {
+        var slide = heroMedia.querySelector('.swiper-slide-active');
+        return slide || heroMedia.querySelector('.swiper-slide');
+    }
+
+    function hideAllErrorPrompts() {
+        heroMedia.querySelectorAll('.video-play-error').forEach(function(el) {
+            el.classList.remove('visible');
+        });
+    }
+
+    function resetAllVideos() {
+        heroMedia.querySelectorAll('video').forEach(function(v) {
+            v.pause();
+            v.currentTime = 0;
+            v.controls = false;
+            v.muted = true;
+        });
+        heroMedia.querySelectorAll('.video-play-overlay').forEach(function(o) {
+            o.classList.remove('hidden');
+            o.hidden = false;
+        });
+        hideAllErrorPrompts();
+    }
+
+    new Swiper("#demoSwiper", {
+        loop: true,
+        autoplay: false,
+        pagination: { el: '.hero-video-pagination', clickable: true },
+        navigation: { nextEl: '.hero-video-next', prevEl: '.hero-video-prev' },
+        on: {
+            slideChange: function() {
+                resetAllVideos();
+            }
+        }
+    });
+
+    heroMedia.addEventListener('click', function(ev) {
+        var overlay = ev.target.closest('.video-play-overlay');
+        if (!overlay) return;
+        ev.preventDefault();
+        var slide = overlay.closest('.swiper-slide') || getActiveSlide();
+        var video = slide ? slide.querySelector('video') : null;
+        var wrap = overlay.closest('.slide-video-wrap');
+        var errEl = wrap ? wrap.querySelector('.video-play-error') : null;
+        if (!video) return;
+        resetAllVideos();
+        video.playsInline = true;
+        video.setAttribute('playsinline', '');
+        video.setAttribute('webkit-playsinline', '');
+        video.controls = true;
+        video.muted = false;
+        video.volume = 1;
+        var info = { src: video.currentSrc, readyState: video.readyState, networkState: video.networkState };
+        console.log('[Hero视频] play调用', info);
+        var p = video.play();
+        p.then(function() {
+            overlay.hidden = true;
+            overlay.classList.add('hidden');
+        }).catch(function(err) {
+            overlay.hidden = false;
+            overlay.classList.remove('hidden');
+            if (errEl) errEl.classList.add('visible');
+            console.error('[Hero视频] play失败', err, { src: video.currentSrc, readyState: video.readyState, networkState: video.networkState });
+        });
+    });
+
+    heroMedia.querySelectorAll('video').forEach(function(vid) {
+        vid.addEventListener('pause', function() {
+            var wrap = vid.closest('.slide-video-wrap');
+            var ov = wrap ? wrap.querySelector('.video-play-overlay') : null;
+            if (ov) { ov.classList.remove('hidden'); ov.hidden = false; }
+        });
+        vid.addEventListener('ended', function() {
+            vid.controls = false;
+            var wrap = vid.closest('.slide-video-wrap');
+            var ov = wrap ? wrap.querySelector('.video-play-overlay') : null;
+            if (ov) { ov.classList.remove('hidden'); ov.hidden = false; }
+        });
+        vid.addEventListener('error', function() {
+            if (vid.error) console.error('[Hero视频] 视频加载/解码错误:', vid.error);
+        });
+    });
+
+    resetAllVideos();
+});
+</script>
+{% endblock %}

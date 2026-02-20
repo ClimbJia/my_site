@@ -1,0 +1,8 @@
+{
+  "cache_ver": "20260216_01",
+  "videos": [
+    {"src": "videos/demo1.mp4", "poster": "posters/p1.jpg", "title": "自助借阅: 1秒刷脸借书", "desc": "孩子刷脸→识别图书→借阅成功,全流程1秒完成"},
+    {"src": "videos/demo2.mp4", "poster": "posters/p2.jpg", "title": "漂流柜借书：开门取书", "desc": "屏幕选书→小门上掀开启→取出唯一一本目标书"},
+    {"src": "videos/demo3.mp4", "poster": "posters/p3.jpg", "title": "微信电子绘本：家园共读", "desc": "家长端随时阅读→打卡→园所可见阅读数据"}
+  ]
+}

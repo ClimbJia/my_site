@@ -1,0 +1,102 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}{{ case.title }} - 小书仔{% endblock %}
+
+{% block content %}
+<section class="page-hero">
+    <div class="container">
+        <h1 class="page-title">{{ case.title }}</h1>
+        <p class="page-subtitle">{{ case.summary|default:case.desc }}</p>
+        {% if case.region or case.type or case.year %}
+        <p class="case-meta">
+            {% if case.region %}<span>{{ case.region }}</span>{% endif %}
+            {% if case.type %}<span>{{ case.type }}</span>{% endif %}
+            {% if case.year %}<span>{{ case.year }}</span>{% endif %}
+        </p>
+        {% endif %}
+    </div>
+</section>
+
+<section class="section product-detail-section">
+    <div class="container">
+        {% if case.poster_url %}
+        <div class="product-detail-cover" style="background-image:url('{{ case.poster_url }}');background-size:cover;background-position:center;aspect-ratio:16/10;border-radius:12px;"></div>
+        {% endif %}
+
+        {% if case.gallery %}
+        <div class="case-gallery">
+            {% for img in case.gallery %}
+            <div class="case-gallery-item" style="background-image:url('{{ img }}');background-size:cover;background-position:center;aspect-ratio:16/10;border-radius:12px;"></div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        {% if case.background %}
+        {% if case.background.pain_points %}
+        <h3 class="product-section-title">背景与痛点</h3>
+        <ul class="product-highlights">
+            {% for p in case.background.pain_points %}
+            <li>{{ p }}</li>
+            {% endfor %}
+        </ul>
+        {% endif %}
+        {% endif %}
+
+        {% if case.solution %}
+        <h3 class="product-section-title">解决方案</h3>
+        {% if case.solution.overview %}
+        <p class="case-solution-overview">{{ case.solution.overview }}</p>
+        {% endif %}
+        {% if case.solution.modules %}
+        <ul class="product-highlights">
+            {% for m in case.solution.modules %}
+            <li>{{ m }}</li>
+            {% endfor %}
+        </ul>
+        {% endif %}
+        {% endif %}
+
+        {% if case.results %}
+        {% if case.results.data %}
+        <h3 class="product-section-title">量化成果</h3>
+        <ul class="product-highlights">
+            {% for r in case.results.data %}
+            <li>{{ r }}</li>
+            {% endfor %}
+        </ul>
+        {% endif %}
+        {% endif %}
+
+        {% if case.highlights %}
+        <h3 class="product-section-title">案例亮点</h3>
+        <ul class="product-highlights">
+            {% for h in case.highlights %}
+            <li>{{ h }}</li>
+            {% endfor %}
+        </ul>
+        {% endif %}
+
+        {% if case.quote %}
+        <blockquote class="case-quote">{{ case.quote }}</blockquote>
+        {% endif %}
+
+        {% if case.content %}
+        <h3 class="product-section-title">案例详情</h3>
+        <div class="case-content">
+            {% if case.content_is_list %}
+            {% for p in case.content %}
+            <p>{{ p }}</p>
+            {% endfor %}
+            {% else %}
+            <div class="case-content-richtext">{{ case.content|safe }}</div>
+            {% endif %}
+        </div>
+        {% endif %}
+
+        <div class="product-cta">
+            <a href="{% if case.cta %}{{ case.cta.href }}{% else %}{{ site.cta.href }}{% endif %}" class="btn btn-primary">{% if case.cta %}{{ case.cta.label }}{% else %}{{ site.cta.label }}{% endif %}</a>
+        </div>
+    </div>
+</section>
+{% endblock %}

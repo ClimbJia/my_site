@@ -1,0 +1,99 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}联系我们 - 小书仔{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/contact.css' %}">
+{% endblock %}
+
+{% block content %}
+<section class="page-hero">
+    <div class="container">
+        <h1 class="page-title">联系我们</h1>
+        <p class="page-subtitle">期待与您合作，共创阅读新未来</p>
+    </div>
+</section>
+<section class="section section-contact-forms">
+    <div class="contact-forms-wrap">
+        <section class="contact-form-block demo-form" id="demo">
+            <h2>预约演示</h2>
+            {% if success %}
+            <div id="success" class="form-success">提交成功，我们会尽快与您联系！</div>
+            {% endif %}
+            <form method="post" action="" class="form-minimal">
+                {% csrf_token %}
+                <input type="hidden" name="form_type" value="demo">
+                {% for field in form %}
+                <div class="form-row">
+                    <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                    {{ field }}
+                    {{ field.errors }}
+                </div>
+                {% endfor %}
+                <div class="btn-wrap">
+                    <button type="submit" class="btn-primary">提交预约</button>
+                </div>
+            </form>
+        </section>
+        <section class="contact-form-block plan-form" id="plan">
+            <h2>索取方案</h2>
+            {% if success_scheme %}
+            <div id="success-scheme" class="form-success scheme-success">提交成功，我们会尽快发送方案资料与您联系！</div>
+            {% endif %}
+            <form method="post" action="" class="form-minimal">
+                {% csrf_token %}
+                <input type="hidden" name="form_type" value="scheme">
+                <div class="form-row">
+                    <label for="{{ scheme_form.name.id_for_label }}">{{ scheme_form.name.label }}</label>
+                    {{ scheme_form.name }}
+                    {{ scheme_form.name.errors }}
+                </div>
+                <div class="form-row">
+                    <label for="{{ scheme_form.phone.id_for_label }}">{{ scheme_form.phone.label }}</label>
+                    {{ scheme_form.phone }}
+                    {{ scheme_form.phone.errors }}
+                </div>
+                <div class="form-row">
+                    <label for="{{ scheme_form.kindergarten.id_for_label }}">{{ scheme_form.kindergarten.label }}</label>
+                    {{ scheme_form.kindergarten }}
+                    {{ scheme_form.kindergarten.errors }}
+                </div>
+                <div class="form-row">
+                    <label for="{{ scheme_form.city.id_for_label }}">{{ scheme_form.city.label }}</label>
+                    {{ scheme_form.city }}
+                    {{ scheme_form.city.errors }}
+                </div>
+                <div class="form-row">
+                    <label for="{{ scheme_form.demand.id_for_label }}">{{ scheme_form.demand.label }}</label>
+                    {{ scheme_form.demand }}
+                    {{ scheme_form.demand.errors }}
+                </div>
+                <div class="form-row scheme-form-honeypot">
+                    {{ scheme_form.website }}
+                </div>
+                <div class="btn-wrap">
+                    <button type="submit" class="btn-primary">提交索取</button>
+                </div>
+            </form>
+        </section>
+    </div>
+</section>
+<section class="section section-contact">
+    <div class="container">
+        <h2 class="section-title">联系方式</h2>
+        <div class="contact-inner">
+            <div class="contact-phone">
+                <p class="contact-label">咨询热线</p>
+                <p class="contact-value">400-960-7985</p>
+            </div>
+            <div class="contact-qr">
+                <div class="qr-box">
+                    <img src="{% static 'qrcodes/qrcode.jpg' %}" alt="扫码咨询" class="qr-img">
+                </div>
+                <p class="qr-caption">扫码咨询</p>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

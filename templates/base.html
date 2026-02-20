@@ -1,0 +1,37 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}小书仔{% endblock %}</title>
+    <link rel="stylesheet" href="{% static 'css/site.css' %}">
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+    <header class="header">
+        <div class="header-inner">
+            <a href="{% url 'home' %}" class="logo">小书仔</a>
+            <nav class="nav">
+                {% for item in site.nav %}
+                <a href="{{ item.href }}" class="nav-link">{{ item.label }}</a>
+                {% endfor %}
+            </nav>
+            <a href="{{ site.cta.href }}" class="btn btn-cta">{{ site.cta.label }}</a>
+        </div>
+    </header>
+
+    <main class="main">
+        {% block content %}{% endblock %}
+    </main>
+
+    <footer class="footer">
+        <div class="footer-inner">
+            <p class="footer-brand">{{ site.footer.brand }}</p>
+            <p class="footer-phone">{{ site.footer.hotline }}</p>
+        </div>
+    </footer>
+
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}资料下载 - 小书仔{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/resources.css' %}">
+{% endblock %}
+
+{% block content %}
+<section class="page-hero">
+    <div class="container">
+        <h1 class="page-title">{{ page_title }}</h1>
+        <p class="page-subtitle">{{ page_subtitle }}</p>
+    </div>
+</section>
+
+<section class="section section-resources">
+    <div class="resources-wrap">
+        <div class="resources-card">
+            <table class="resources-table">
+                <thead>
+                    <tr>
+                        <th>序号</th>
+                        <th>产品</th>
+                        <th>宣传资料</th>
+                        <th>详细参数</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in products %}
+                    <tr>
+                        <td>{{ forloop.counter }}</td>
+                        <td>{{ item.product }}</td>
+                        <td>
+                            {% for f in item.brochures|default:"" %}
+                            <a href="{% url 'resources' %}?id={{ f.id }}#preview" class="resource-file-btn {% if active_file and active_file.id == f.id %}active{% endif %}">{{ f.name }}{% if f.type %} ({{ f.type }}){% endif %}</a>
+                            {% empty %}
+                            —
+                            {% endfor %}
+                        </td>
+                        <td>
+                            {% for f in item.specs|default:"" %}
+                            <a href="{% url 'resources' %}?id={{ f.id }}#preview" class="resource-file-btn {% if active_file and active_file.id == f.id %}active{% endif %}">{{ f.name }}{% if f.type %} ({{ f.type }}){% endif %}</a>
+                            {% empty %}
+                            —
+                            {% endfor %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        <div class="resources-preview-card" id="preview">
+            <h2 class="resources-preview-title">预览</h2>
+            {% if active_file %}
+                {% if active_file.type == "PDF" %}
+                <iframe class="resources-preview-iframe" src="{{ active_file.file }}" title="{{ active_file.name }}"></iframe>
+                {% else %}
+                <div class="resources-preview-download">
+                    <p>该资料为 {{ active_file.type }} 格式，请点击下方按钮下载后查看。</p>
+                    <a href="{{ active_file.file }}" class="resource-file-btn" target="_blank" download>{{ active_file.name }} — 下载</a>
+                </div>
+                {% endif %}
+            {% else %}
+            <p class="resources-preview-empty">暂无资料，请从上方表格选择。</p>
+            {% endif %}
+        </div>
+    </div>
+</section>
+{% endblock %}

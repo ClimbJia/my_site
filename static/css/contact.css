@@ -1,0 +1,137 @@
+/* ===========================================
+   联系我们页 - 极简表单统一样式
+   =========================================== */
+
+/* 外层容器与区块间距 */
+.contact-forms-wrap {
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 0 24px;
+}
+
+.contact-form-block {
+    width: 100%;
+    margin: 0;
+}
+
+.demo-form {
+    padding-bottom: 40px;
+}
+
+.plan-form {
+    padding-top: 10px;
+}
+
+/* 标题统一 */
+.contact-form-block h2 {
+    font-size: 28px;
+    font-weight: 800;
+    text-align: center;
+    margin: 24px 0 18px;
+    letter-spacing: 1px;
+}
+
+/* 极简表单统一 */
+.form-minimal {
+    width: 520px;
+    margin: 0 auto;
+}
+
+.form-minimal .form-row {
+    margin-bottom: 16px;
+}
+
+.form-minimal label {
+    display: block;
+    font-size: 14px;
+    font-weight: 600;
+    margin: 0 0 8px;
+    color: #1f2d3d;
+}
+
+.form-minimal input,
+.form-minimal textarea {
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+    height: 44px;
+    border: 1px solid #dbe4f0;
+    border-radius: 10px;
+    padding: 10px 14px;
+    font-size: 14px;
+    outline: none;
+    background: #fff;
+}
+
+.form-minimal textarea {
+    height: 120px;
+    resize: vertical;
+    padding-top: 12px;
+}
+
+.form-minimal input:focus,
+.form-minimal textarea:focus {
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.12);
+}
+
+/* 按钮统一 */
+.form-minimal .btn-primary {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    height: 44px;
+    padding: 0 22px;
+    border-radius: 12px;
+    border: none;
+    background: #2563eb;
+    color: #fff;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.form-minimal .btn-primary:hover {
+    filter: brightness(0.98);
+}
+
+.form-minimal .btn-wrap {
+    margin-top: 14px;
+}
+
+/* 成功提示 */
+.form-success {
+    padding: var(--spacing-md);
+    background: #ecfdf5;
+    color: #059669;
+    border-radius: var(--radius);
+    margin-bottom: var(--spacing-lg);
+}
+
+/* 隐藏 honeypot */
+.scheme-form-honeypot {
+    position: absolute;
+    left: -9999px;
+    opacity: 0;
+    pointer-events: none;
+}
+
+/* 错误提示 */
+.form-minimal .errorlist {
+    list-style: none;
+    margin: 4px 0 0;
+    padding: 0;
+    font-size: 13px;
+    color: #dc2626;
+}
+
+.section-contact-forms {
+    background: linear-gradient(180deg, #f0f9ff 0%, #f8fafc 100%);
+    padding: var(--spacing-2xl) var(--spacing-lg);
+}
+
+@media (max-width: 640px) {
+    .form-minimal {
+        width: 100%;
+        max-width: 100%;
+    }
+}
