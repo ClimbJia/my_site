@@ -3,7 +3,7 @@ import os
 from pathlib import Path
 
 from django.conf import settings
-from django.http import Http404, HttpResponseBadRequest, JsonResponse
+from django.http import Http404, HttpResponse, HttpResponseBadRequest, JsonResponse
 from django.shortcuts import redirect, render
 from django.templatetags.static import static
 from django.urls import reverse
@@ -350,22 +350,19 @@ def resources(request):
     if not isinstance(products, list):
         products = []
 
-    # 展平所有文件，按 file.id 建 file_map；无 id 的条目用索引补 id
+    # 展平所有文件，按 file.id 建 file_map；无 id 的条目用索引补 id；附带 product
     file_map = {}
     for item in products:
+        prod = item.get("product", "")
         for f in item.get("brochures") or []:
             f = dict(f)
-            f["id"] = str(
-                f.get("id")
-                or ("brochure-%s-%s" % (item.get("product", ""), f.get("name", "")))
-            )
+            f["id"] = str(f.get("id") or ("brochure-%s-%s" % (prod, f.get("name", ""))))
+            f["product"] = prod
             file_map[f["id"]] = f
         for f in item.get("specs") or []:
             f = dict(f)
-            f["id"] = str(
-                f.get("id")
-                or ("spec-%s-%s" % (item.get("product", ""), f.get("name", "")))
-            )
+            f["id"] = str(f.get("id") or ("spec-%s-%s" % (prod, f.get("name", ""))))
+            f["product"] = prod
             file_map[f["id"]] = f
 
     all_files = list(file_map.values())
@@ -387,6 +384,7 @@ def resources(request):
             "products": products,
             "file_map": file_map,
             "active_file": active_file,
+            "download_lead_ok": bool(request.session.get("download_lead_ok")),
         },
     )
 
@@ -396,6 +394,14 @@ def _get_client_ip(request):
     if xff:
         return xff.split(",")[0].strip()
     return request.META.get("REMOTE_ADDR", "")
+
+
+def _forbidden(request, msg: str):
+    # 如果是前端 fetch 发来的 Ajax 请求，返回 JSON，方便前端显示错误
+    if request.headers.get("x-requested-with") == "XMLHttpRequest":
+        return JsonResponse({"ok": False, "errors": {"__all__": [msg]}}, status=403)
+    # 普通浏览器直接访问时，返回纯文本（或你也可以返回一个模板页）
+    return HttpResponse(msg, status=403)
 
 
 def _resolve_static_file(file_path_str: str):
@@ -415,56 +421,75 @@ def _resolve_static_file(file_path_str: str):
     return full_path
 
 
+@require_http_methods(["GET"])
+def preview(request):
+    """GET /preview/?file=/static/files/xxx.pdf -> 需已登记且仅允许 PDF，内联预览。"""
+    if not request.session.get("download_lead_ok"):
+        return _forbidden("未登记，无权预览")
+    file_path_str = request.GET.get("file") or ""
+    full_path = _resolve_static_file(file_path_str)
+    if full_path is None:
+        raise Http404("文件不存在")
+    if full_path.suffix.lower() != ".pdf":
+        return HttpResponse("仅支持 PDF 预览", status=400)
+    return FileResponse(
+        open(full_path, "rb"),
+        as_attachment=False,
+        filename=os.path.basename(full_path),
+        content_type="application/pdf",
+    )
+
+
 @require_http_methods(["GET", "POST"])
 def download(request):
-    # GET: /download/?file=/static/files/xxx.pdf -> 直接返回文件
-    if request.method == "GET":
-        file_path_str = request.GET.get("file") or ""
-        full_path = _resolve_static_file(file_path_str)
+    # POST: 表单登记，成功后只返回 JSON
+    if request.method == "POST":
+        form = DownloadLeadForm(request.POST)
+        if not form.is_valid():
+            return JsonResponse({"ok": False, "errors": form.errors}, status=400)
+
+        file_path = (request.POST.get("file_path") or "").strip()
+        product_name = (request.POST.get("product_name") or "").strip()
+        file_name = (request.POST.get("file_name") or "").strip()
+        file_type = (request.POST.get("file_type") or "").strip()
+
+        if not file_path or not product_name or not file_name:
+            return JsonResponse(
+                {"ok": False, "errors": {"__all__": ["缺少文件信息"]}}, status=400
+            )
+
+        full_path = _resolve_static_file(file_path)
         if full_path is None:
-            raise Http404("文件不存在")
-        filename = os.path.basename(full_path)
-        return FileResponse(
-            open(full_path, "rb"), as_attachment=True, filename=filename
+            return JsonResponse(
+                {"ok": False, "errors": {"__all__": ["文件不存在或路径无效"]}},
+                status=404,
+            )
+
+        cd = form.cleaned_data
+        DownloadLead.objects.create(
+            name=cd["name"],
+            phone=cd["phone"],
+            kindergarten=cd["kindergarten"],
+            city=cd["city"],
+            product_name=product_name,
+            file_name=file_name,
+            file_type=file_type,
+            file_path=file_path,
+            ip_address=_get_client_ip(request) or None,
+            user_agent=request.META.get("HTTP_USER_AGENT", "")[:500],
         )
+        request.session["download_lead_ok"] = True
+        return JsonResponse({"ok": True})
 
-    # POST: 表单登记后下载
-    form = DownloadLeadForm(request.POST)
-    if not form.is_valid():
-        return JsonResponse({"ok": False, "errors": form.errors}, status=400)
-
-    file_path = (request.POST.get("file_path") or "").strip()
-    product_name = (request.POST.get("product_name") or "").strip()
-    file_name = (request.POST.get("file_name") or "").strip()
-    file_type = (request.POST.get("file_type") or "").strip()
-
-    if not file_path or not product_name or not file_name:
-        return JsonResponse(
-            {"ok": False, "errors": {"__all__": ["缺少文件信息"]}}, status=400
-        )
-
-    full_path = _resolve_static_file(file_path)
+    # GET: /download/?file=... -> 需已登记才返回文件
+    if not request.session.get("download_lead_ok"):
+        return _forbidden(request, "未登记，无权下载")
+    file_path_str = request.GET.get("file") or ""
+    full_path = _resolve_static_file(file_path_str)
     if full_path is None:
-        return JsonResponse(
-            {"ok": False, "errors": {"__all__": ["文件不存在或路径无效"]}}, status=404
-        )
-
-    cd = form.cleaned_data
-    DownloadLead.objects.create(
-        name=cd["name"],
-        phone=cd["phone"],
-        kindergarten=cd["kindergarten"],
-        city=cd["city"],
-        product_name=product_name,
-        file_name=file_name,
-        file_type=file_type,
-        file_path=file_path,
-        ip_address=_get_client_ip(request) or None,
-        user_agent=request.META.get("HTTP_USER_AGENT", "")[:500],
+        raise Http404("文件不存在")
+    return FileResponse(
+        open(full_path, "rb"),
+        as_attachment=True,
+        filename=os.path.basename(full_path),
     )
-
-    filename_for_header = os.path.basename(full_path)
-    response = FileResponse(
-        open(full_path, "rb"), as_attachment=True, filename=filename_for_header
-    )
-    return response

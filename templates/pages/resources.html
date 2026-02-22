@@ -34,14 +34,14 @@
                         <td>{{ item.product }}</td>
                         <td>
                             {% for f in item.brochures|default:"" %}
-                            <a href="{% url 'resources' %}?id={{ f.id }}#preview" class="resource-file-btn {% if active_file and active_file.id == f.id %}active{% endif %}">{{ f.name }}{% if f.type %} ({{ f.type }}){% endif %}</a>
+                            <a href="#" class="js-file-btn resource-file-btn {% if active_file and active_file.id == f.id %}active{% endif %}" data-id="{{ f.id }}" data-file="{{ f.file }}" data-name="{{ f.name }}" data-type="{{ f.type|default:'' }}" data-product="{{ item.product|default:'' }}">{{ f.name }}{% if f.type %} ({{ f.type }}){% endif %}</a>
                             {% empty %}
                             —
                             {% endfor %}
                         </td>
                         <td>
                             {% for f in item.specs|default:"" %}
-                            <a href="{% url 'resources' %}?id={{ f.id }}#preview" class="resource-file-btn {% if active_file and active_file.id == f.id %}active{% endif %}">{{ f.name }}{% if f.type %} ({{ f.type }}){% endif %}</a>
+                            <a href="#" class="js-file-btn resource-file-btn {% if active_file and active_file.id == f.id %}active{% endif %}" data-id="{{ f.id }}" data-file="{{ f.file }}" data-name="{{ f.name }}" data-type="{{ f.type|default:'' }}" data-product="{{ item.product|default:'' }}">{{ f.name }}{% if f.type %} ({{ f.type }}){% endif %}</a>
                             {% empty %}
                             —
                             {% endfor %}
@@ -54,18 +54,235 @@
         <div class="resources-preview-card" id="preview">
             <h2 class="resources-preview-title">预览</h2>
             {% if active_file %}
-                {% if active_file.type == "PDF" %}
-                <iframe class="resources-preview-iframe" src="{{ active_file.file }}" title="{{ active_file.name }}"></iframe>
+                {% if active_file.type|lower == "pdf" %}
+                <iframe class="resources-preview-iframe" id="previewIframe" src="" data-preview-url="{% url 'preview' %}?file={{ active_file.file|urlencode }}" title="{{ active_file.name }}"></iframe>
                 {% else %}
                 <div class="resources-preview-download">
                     <p>该资料为 {{ active_file.type }} 格式，请点击下方按钮下载后查看。</p>
-                    <a href="{{ active_file.file }}" class="resource-file-btn" target="_blank" download>{{ active_file.name }} — 下载</a>
                 </div>
                 {% endif %}
+                <div class="resources-preview-dl-wrap">
+                    <a href="#" class="js-download resource-file-btn" data-file="{{ active_file.file }}" data-name="{{ active_file.name }}" data-type="{{ active_file.type|default:'' }}" data-product="{{ active_file.product|default:'' }}" data-id="{{ active_file.id }}">下载本资料</a>
+                </div>
             {% else %}
-            <p class="resources-preview-empty">暂无资料，请从上方表格选择。</p>
+            <p class="resources-preview-empty">请从上方表格选择资料。</p>
             {% endif %}
         </div>
     </div>
 </section>
+
+<div id="downloadModal" class="resource-modal" aria-hidden="true">
+    <div class="resource-modal-backdrop"></div>
+    <div class="resource-modal-box">
+        <button type="button" class="resource-modal-close" aria-label="关闭">&times;</button>
+        <h3 class="resource-modal-title">下载登记</h3>
+        <form id="downloadLeadForm" class="form-minimal">
+            {% csrf_token %}
+            <input type="hidden" name="file_path" id="modal-file-path" value="">
+            <input type="hidden" name="product_name" id="modal-product-name" value="">
+            <input type="hidden" name="file_name" id="modal-file-name" value="">
+            <input type="hidden" name="file_type" id="modal-file-type" value="">
+            <input type="hidden" name="file_id" id="modal-file-id" value="">
+            <div class="form-row">
+                <label for="modal-name">姓名</label>
+                <input type="text" id="modal-name" name="name" class="form-input" placeholder="请输入姓名" required>
+            </div>
+            <div class="form-row">
+                <label for="modal-phone">电话</label>
+                <input type="text" id="modal-phone" name="phone" class="form-input" placeholder="请输入11位手机号" required>
+            </div>
+            <div class="form-row">
+                <label for="modal-kindergarten">园所名称</label>
+                <input type="text" id="modal-kindergarten" name="kindergarten" class="form-input" placeholder="请输入园所名称" required>
+            </div>
+            <div class="form-row">
+                <label for="modal-city">城市</label>
+                <input type="text" id="modal-city" name="city" class="form-input" placeholder="请输入城市" required>
+            </div>
+            <div class="form-row form-error" id="formError"></div>
+            <div class="btn-wrap">
+                <button type="submit" class="btn-primary">确认并继续</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+(function() {
+    var DOWNLOAD_LEAD_OK = {{ download_lead_ok|yesno:"true,false" }};
+    var STORAGE_KEY = 'download_lead_ok'; // 本次浏览器 Tab 会话
+    var resourcesUrl = "{% url 'resources' %}";
+    var downloadUrl = "{% url 'download' %}";
+    var previewUrl = "{% url 'preview' %}";
+
+    function isRegistered() {
+        return DOWNLOAD_LEAD_OK || sessionStorage.getItem(STORAGE_KEY) === '1';
+    }
+    function setRegistered() {
+        sessionStorage.setItem(STORAGE_KEY, '1');
+    }
+    function getCsrfToken() {
+        var el = document.querySelector('#downloadLeadForm [name=csrfmiddlewaretoken]') ||
+                 document.querySelector('[name=csrfmiddlewaretoken]');
+        return el ? el.value : '';
+    }
+    function isPdf(type) {
+        return (type || '').toUpperCase() === 'PDF';
+    }
+    function scrollToPreview() {
+        var el = document.getElementById('preview');
+        if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+
+    // ===== Modal =====
+    var modal = document.getElementById('downloadModal');
+    var form = document.getElementById('downloadLeadForm');
+    var formError = document.getElementById('formError');
+    var backdrop = modal && modal.querySelector('.resource-modal-backdrop');
+    var closeBtn = modal && modal.querySelector('.resource-modal-close');
+
+    // 记录“登记成功后要执行的动作”
+    var pending = null;
+
+    function openModal(payload) {
+        pending = payload;
+
+        document.getElementById('modal-file-path').value = payload.file || '';
+        document.getElementById('modal-product-name').value = payload.product || '';
+        document.getElementById('modal-file-name').value = payload.name || '';
+        document.getElementById('modal-file-type').value = payload.type || '';
+        document.getElementById('modal-file-id').value = payload.id || '';
+
+        if (formError) formError.textContent = '';
+        if (modal) { modal.classList.add('is-open'); modal.setAttribute('aria-hidden', 'false'); }
+    }
+
+    function closeModal() {
+        if (modal) { modal.classList.remove('is-open'); modal.setAttribute('aria-hidden', 'true'); }
+    }
+
+    // 统一：预览/下载的跳转行为
+    function go(payload) {
+        if (!payload) return;
+
+        // PDF：跳到资源页并在页面加载时自动设置 iframe src
+        if (isPdf(payload.type)) {
+            var url = resourcesUrl + '?id=' + encodeURIComponent(payload.id) + '#preview';
+            location.href = url;
+            return;
+        }
+
+        // 非 PDF：直接下载（后端会校验 session）
+        window.open(downloadUrl + '?file=' + encodeURIComponent(payload.file), '_blank');
+    }
+
+    // ===== 点击文件按钮 =====
+    document.querySelectorAll('.js-file-btn').forEach(function(btn) {
+        btn.addEventListener('click', function(e) {
+            e.preventDefault();
+
+            var payload = {
+                id: btn.getAttribute('data-id') || '',
+                file: btn.getAttribute('data-file') || '',
+                name: btn.getAttribute('data-name') || '',
+                type: btn.getAttribute('data-type') || '',
+                product: btn.getAttribute('data-product') || ''
+            };
+
+            // 强控制：预览也必须登记
+            if (!isRegistered()) {
+                openModal(payload);
+                return;
+            }
+
+            // 已登记：直接跳转/下载
+            go(payload);
+            scrollToPreview();
+        });
+    });
+
+    // ===== 预览区“下载本资料”按钮 =====
+    document.querySelectorAll('.js-download').forEach(function(btn) {
+        btn.addEventListener('click', function(e) {
+            e.preventDefault();
+
+            var payload = {
+                id: btn.getAttribute('data-id') || '',
+                file: btn.getAttribute('data-file') || '',
+                name: btn.getAttribute('data-name') || '',
+                type: btn.getAttribute('data-type') || '',
+                product: btn.getAttribute('data-product') || ''
+            };
+
+            if (!isRegistered()) {
+                openModal(payload);
+                return;
+            }
+            window.open(downloadUrl + '?file=' + encodeURIComponent(payload.file), '_blank');
+        });
+    });
+
+    if (backdrop) backdrop.addEventListener('click', closeModal);
+    if (closeBtn) closeBtn.addEventListener('click', closeModal);
+
+    // ===== 表单提交（登记）=====
+    if (form) {
+        form.addEventListener('submit', function(e) {
+            e.preventDefault();
+            if (formError) formError.textContent = '';
+
+            var fd = new FormData(form);
+
+            fetch(downloadUrl, {
+                method: 'POST',
+                body: fd,
+                headers: {
+                    'X-CSRFToken': getCsrfToken(),
+                    'X-Requested-With': 'XMLHttpRequest'
+                },
+                credentials: 'same-origin'
+            }).then(async function(r) {
+                // ✅ 关键修复：兼容非 JSON 返回
+                var ct = (r.headers.get('content-type') || '').toLowerCase();
+                if (ct.includes('application/json')) {
+                    return { ok: r.ok, status: r.status, data: await r.json() };
+                }
+                return { ok: r.ok, status: r.status, text: await r.text() };
+            }).then(function(res) {
+                if (res.ok && res.data && res.data.ok) {
+                    setRegistered();
+                    closeModal();
+                    // 登记成功：执行刚才点击的文件动作（跳转/下载）
+                    go(pending);
+                    pending = null;
+                    return;
+                }
+
+                // 显示更真实的错误，而不是统一“网络错误”
+                var msg = '提交失败，请重试';
+                if (res.data && res.data.errors) {
+                    msg = (res.data.errors.__all__ && res.data.errors.__all__[0]) || msg;
+                } else if (res.status === 403) {
+                    msg = 'CSRF 校验失败或未登录会话失效，请刷新页面后重试';
+                } else if (res.text) {
+                    msg = res.text.slice(0, 120);
+                }
+                if (formError) formError.textContent = msg;
+            }).catch(function(err) {
+                if (formError) formError.textContent = '请求失败，请检查控制台/服务端日志';
+                console.error(err);
+            });
+        });
+    }
+
+    // ===== 页面加载：如果已登记且当前是 PDF 资源，则加载 iframe 预览 =====
+    var iframe = document.getElementById('previewIframe');
+    if (iframe && isRegistered()) {
+        var src = iframe.getAttribute('data-preview-url');
+        if (src) iframe.src = src;
+    }
+})();
+</script>
 {% endblock %}

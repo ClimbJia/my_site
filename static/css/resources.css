@@ -104,8 +104,8 @@
     padding: 24px 0;
 }
 
-.resources-preview-download .resource-file-btn {
-    margin-top: 12px;
+.resources-preview-dl-wrap {
+    margin-top: 16px;
 }
 
 .resources-preview-empty {
@@ -179,6 +179,11 @@
 
 .resource-modal-box .form-row {
     margin-bottom: 16px;
+}
+
+.resource-modal-box .form-row.form-error {
+    color: #dc2626;
+    font-size: 14px;
 }
 
 .resource-modal-box label {

@@ -8,6 +8,7 @@ from .views import (
     case_detail,
     contact,
     resources,
+    preview,
     download,
 )
 
@@ -20,5 +21,6 @@ urlpatterns = [
     path("cases/<str:cid>/", case_detail, name="case_detail"),
     path("contact/", contact, name="contact"),
     path("resources/", resources, name="resources"),
+    path("preview/", preview, name="preview"),
     path("download/", download, name="download"),
 ]
